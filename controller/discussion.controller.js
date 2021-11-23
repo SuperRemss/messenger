@@ -1,13 +1,8 @@
 const express = require('express');
 const DiscussionModel = require("../model/discussion.model");
-const UserModel = require("../model/user.model");
 const {param, validationResult, body} = require("express-validator");
 const router = express.Router();
-const discussionFindMiddleware = async (req, res, next) => {
 
-  req.discussion = discussion;
-  next();
-};
 
 
 /**
@@ -67,11 +62,6 @@ router.put('/addMember', async (req, res) => {
     }
 
     let idMember = req.body.idMember;
-    const member = await UserModel.findOne({_id: idMember});
-    if (!member) {
-      return res.status(404).send({message: 'member not found'});
-    }
-
     const memberInDiscussion = discussion.members.includes(idMember);
     if (memberInDiscussion) {
       return res.status(409).send({message: 'member already in the discussion'});
