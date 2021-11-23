@@ -5,7 +5,7 @@ const router = express.Router();
 
 
 /**
- * Find users by
+ * Find users
  */
 router.get('/', async (req, res) => {
   const users = await UserModel.find();
@@ -35,7 +35,7 @@ router.get('/:id',
     .withMessage('id is required')
     .isMongoId()
     .withMessage('id needs to be a mongodb id'),
-  (req, res, next) => {
+  async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({errors: errors.array()});
@@ -47,7 +47,7 @@ router.get('/:id',
     if (!user) {
       res.status(404).send({message: 'user not found'});
     }
-    res.send({user});
+    res.send({user: user});
   })
 
 /**

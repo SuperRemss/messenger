@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 app.use('/api/users', UserController);
 app.use('/api/auth', AuthController);
 app.use('/api/discussions', DiscussionController);
-app.use('api/messages', MessageController);
+app.use('/api/messages', MessageController);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
