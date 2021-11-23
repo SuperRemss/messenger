@@ -1,23 +1,19 @@
 const mongoose = require('./mongoose');
 const bcrypt = require('bcrypt');
 const salt = '$2b$10$uMMerxBWR8pPg8NFXLewXe';
+const validators = require("../validators");
 
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
     index: true,
-    validate: {
-      validator: async (value) => {
-        const users = await UserModel.find({username: value});
-        return users.length === 0
-      },
-      message: 'User already exists!'
-    }
+    validate: validators.usernameValidators,
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    validate: validators.passwordValidators
   },
 }, {timestamps: true});
 
