@@ -1,12 +1,12 @@
 const express = require('express');
 const UserModel = require("../model/user.model");
 const {param, validationResult, body} = require("express-validator");
-const auth = require("../middlewareAuth");
+const auth = require("../middleware/auth");
 const router = express.Router();
 
 
 /**
- * Find users
+ * Find users (don't need to be connected)
  */
 router.get('/', async (req, res) => {
   const users = await UserModel.find();

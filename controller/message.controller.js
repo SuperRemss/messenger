@@ -3,24 +3,18 @@ const MessageModel = require("../model/message.model");
 const {body, param, validationResult} = require("express-validator");
 const DiscussionModel = require("../model/discussion.model");
 const router = express.Router();
-const auth = require('../middlewareAuth')
+const auth = require('../middleware/auth')
+const isInDiscussion = require('../middleware/isInDiscussion')
 
 
 /**
  * Send a message
  */
-router.post('/', auth, body("msgContent").escape(), async (req, res) => {
+router.post('/', auth, isInDiscussion,
+  body("msgContent").escape(),
+  async (req, res) => {
   try {
-    // Check if the discussion exist
-    let discussion = await DiscussionModel.findOne({_id: req.body.idDiscussion});
-    if (!discussion) {
-      return res.status(404).send({message: 'discussion not found'});
-    }
-    // Check if the current user is in the discussion
-    const currentUserInDiscussion = discussion.members.includes(req.user._id);
-    if (!currentUserInDiscussion) {
-      return res.status(404).send({message: 'You aren\'t a member of this discussion so you can\'t send a message'});
-    }
+   let discussion = await DiscussionModel.findOne({_id: req.body.idDiscussion});
     // Message creation
     let message = new MessageModel({"message": req.body.msgContent, "sender": req.user._id});
     message = await message.save();
@@ -35,7 +29,7 @@ router.post('/', auth, body("msgContent").escape(), async (req, res) => {
 })
 
 /**
- * Find messages
+ * Find messages with pagination (page & limit)
  */
 router.get('/', auth, async (req, res) => {
   const page = req.query.page;
@@ -43,6 +37,9 @@ router.get('/', auth, async (req, res) => {
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
   const messages = await MessageModel.find();
+  if (!messages) {
+    return res.status(404).send({message: 'Messages not found'});
+  }
   res.status(200).send({
     messages: messages.slice(startIndex, endIndex),
     page: page,
@@ -52,7 +49,7 @@ router.get('/', auth, async (req, res) => {
 })
 
 /**
- * Find messages i sent
+ * Find messages i sent  with pagination (page & limit
  */
 router.get('/me', auth, async (req, res) => {
   const page = req.query.page;
@@ -61,7 +58,7 @@ router.get('/me', auth, async (req, res) => {
   const endIndex = page * limit;
   const messages = await MessageModel.find({sender: req.user._id});
   if (!messages) {
-    return res.status(404).send({message: 'messages not found'});
+    return res.status(404).send({message: 'Messages not found'});
   }
   res.status(200).send({
     messages: messages.slice(startIndex, endIndex),

@@ -4,7 +4,7 @@ const userAlreadyExist = async (value) => {
   return users.length === 0;
 }
 
-const userExist = async (value) => {
+const userNotFound = async (value) => {
   const UserModel = require("./model/user.model");
   return await UserModel.findOne({_id: value});
 }
@@ -21,9 +21,6 @@ const msgTooLong = async (value) => {
   return value.length <= 300;
 }
 
-const verifConnexion =
-
-
 module.exports = {
   usernameValidators: [
     {validator: userAlreadyExist, msg: "User already exists!"},
@@ -38,5 +35,5 @@ module.exports = {
   messageValidators: [
     {validator: msgTooLong, msg: "Your message is too long"},
   ],
-  userNotFound: [{validator: userExist, msg: "User not found"}]
+  userNotFound: [{validator: userNotFound, msg: "User not found"}]
 };

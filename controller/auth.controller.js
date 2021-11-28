@@ -4,7 +4,7 @@ const UserModel = require("../model/user.model");
 const router = express.Router();
 const jsonwebtoken = require('jsonwebtoken');
 const {secret} = require('../config');
-const auth = require("../middlewareAuth");
+const auth = require("../middleware/auth");
 
 
 router.post('/login',
@@ -22,7 +22,7 @@ router.post('/login',
     next();
   },
   async (req, res) => {
-    const user = await UserModel.findOne({username: req.body.username});
+  const user = await UserModel.findOne({username: req.body.username});
     if (!user) {
       return res.status(404).send({message: 'user not found'});
     }
