@@ -12,8 +12,8 @@ const messageSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
     validate:validators.userNotFound
-  }
-});
+  }},
+  {timestamps: true});
 
 const MessageModel = mongoose.model('message', messageSchema);
 module.exports = MessageModel;

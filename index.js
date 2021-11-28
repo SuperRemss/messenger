@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 3000;
+/** ------------------ CONTROLLER ------------------ **/
 const UserController = require('./controller/user.controller');
 const AuthController = require('./controller/auth.controller');
 const DiscussionController = require('./controller/discussion.controller');
@@ -23,8 +24,8 @@ app.use((req, res, next) => {
 app.use('/api/users', UserController);
 app.use('/api/auth', AuthController);
 app.use('/api/discussions', DiscussionController);
-app.use('api/messages', MessageController);
+app.use('/api/messages', MessageController);
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Messenger app listening at http://localhost:${port}`);
 })

@@ -1,11 +1,12 @@
 const express = require('express');
 const UserModel = require("../model/user.model");
 const {param, validationResult, body} = require("express-validator");
+const auth = require("../middleware/auth");
 const router = express.Router();
 
 
 /**
- * Find users by
+ * Find users (don't need to be connected)
  */
 router.get('/', async (req, res) => {
   const users = await UserModel.find();
@@ -15,10 +16,7 @@ router.get('/', async (req, res) => {
 /**
  * Find the current user
  */
-router.get('/me', async (req, res) => {
-  if (!req.user) {
-    return res.status(401).send({message: 'unauthorized'});
-  }
+router.get('/me', auth, async (req, res) => {
   const user = await UserModel.findOne({_id: req.user._id});
   if (!user) {
     return res.status(404).send({message: 'user not found'});
@@ -29,13 +27,13 @@ router.get('/me', async (req, res) => {
 /**
  * Find by id
  */
-router.get('/:id',
+router.get('/:id', auth,
   param('id')
     .notEmpty()
     .withMessage('id is required')
     .isMongoId()
     .withMessage('id needs to be a mongodb id'),
-  (req, res, next) => {
+  async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({errors: errors.array()});
@@ -47,7 +45,7 @@ router.get('/:id',
     if (!user) {
       res.status(404).send({message: 'user not found'});
     }
-    res.send({user});
+    res.send({user: user});
   })
 
 /**

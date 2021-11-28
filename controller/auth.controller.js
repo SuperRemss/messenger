@@ -4,6 +4,8 @@ const UserModel = require("../model/user.model");
 const router = express.Router();
 const jsonwebtoken = require('jsonwebtoken');
 const {secret} = require('../config');
+const auth = require("../middleware/auth");
+
 
 router.post('/login',
   body('username')
@@ -20,7 +22,7 @@ router.post('/login',
     next();
   },
   async (req, res) => {
-    const user = await UserModel.findOne({username: req.body.username});
+  const user = await UserModel.findOne({username: req.body.username});
     if (!user) {
       return res.status(404).send({message: 'user not found'});
     }
@@ -39,9 +41,9 @@ router.post('/login',
     })
   })
 
-router.delete('/logout', async (req, res) => {
+router.delete('/logout', auth, async (req, res) => {
   res.cookie('jwt', '', {maxAge: 0});
-  res.send({});
+  res.send({Success: "You've been disconnected"});
 })
 
 module.exports = router;
