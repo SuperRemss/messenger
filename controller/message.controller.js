@@ -19,10 +19,10 @@ router.post('/', auth, body("msgContent").escape(), async (req, res) => {
     // Check if the current user is in the discussion
     const currentUserInDiscussion = discussion.members.includes(req.user._id);
     if (!currentUserInDiscussion) {
-      return res.status(404).send({message: 'You aren\'t a member of this discussion so you can\'t send a message' });
+      return res.status(404).send({message: 'You aren\'t a member of this discussion so you can\'t send a message'});
     }
     // Message creation
-    let message = new MessageModel({"message":req.body.msgContent, "sender":req.user._id});
+    let message = new MessageModel({"message": req.body.msgContent, "sender": req.user._id});
     message = await message.save();
     // Add message to the discussion
     discussion.messages.push(message._id);
@@ -38,14 +38,42 @@ router.post('/', auth, body("msgContent").escape(), async (req, res) => {
  * Find messages
  */
 router.get('/', auth, async (req, res) => {
-    const messages = await MessageModel.find();
-    res.status(200).send({messages: messages});
+  const page = req.query.page;
+  const limit = req.query.limit;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const messages = await MessageModel.find();
+  res.status(200).send({
+    messages: messages.slice(startIndex, endIndex),
+    page: page,
+    limit: limit,
+    nbMessages: messages.slice(startIndex, endIndex).length
+  });
 })
 
+/**
+ * Find messages i sent
+ */
+router.get('/me', auth, async (req, res) => {
+  const page = req.query.page;
+  const limit = req.query.limit;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const messages = await MessageModel.find({sender: req.user._id});
+  if (!messages) {
+    return res.status(404).send({message: 'messages not found'});
+  }
+  res.status(200).send({
+    messages: messages.slice(startIndex, endIndex),
+    page: page,
+    limit: limit,
+    nbMessages: messages.slice(startIndex, endIndex).length
+  });
+})
 
 /**
-* Find by id
-*/
+ * Find by id
+ */
 router.get('/:id?', auth,
   param('id')
     .notEmpty()
@@ -60,14 +88,12 @@ router.get('/:id?', auth,
     next()
   },
   async (req, res) => {
-    const discussion = await DiscussionModel.findOne({_id: req.params.id});
-    if (!discussion) {
-      return res.status(404).send({message: 'discussion not found'});
+    const message = await MessageModel.findOne({_id: req.params.id});
+    if (!message) {
+      return res.status(404).send({message: 'Message not found'});
     }
-    res.status(200).send({discussion:discussion});
+    res.status(200).send({message: message});
   })
-
-
 
 
 module.exports = router;
