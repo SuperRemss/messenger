@@ -1,7 +1,9 @@
 # Messenger app
 
 Messenger app a chat REST API, you'll be able to talk with others, create groups and send messages  
-##Setup
+
+## Setup
+
 ### Requirements
 
 * [Node.js](https://nodejs.org/en/)
