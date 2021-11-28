@@ -1,16 +1,19 @@
 const express = require('express');
 const DiscussionModel = require("../model/discussion.model");
 const {param, validationResult, body} = require("express-validator");
-const UserModel = require("../model/user.model");
 const router = express.Router();
+const auth = require('../middlewareAuth')
 
 
 
 /**
  * Create a discussion
  */
-router.post('/', body("name").escape(), async (req, res) => {
+router.post('/',auth, body("name").escape(), async (req, res) => {
   try {
+    if (!req.user) {
+    return res.status(401).send({message: 'Login required'});
+    }
     let discussion = new DiscussionModel(req.body);
     discussion.members.push(req.user._id);
     discussion = await discussion.save();
@@ -23,29 +26,32 @@ router.post('/', body("name").escape(), async (req, res) => {
 /**
  * Find discussions
  */
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({message: 'Login required'});
+  }
   const discussions = await DiscussionModel.find();
-  res.send({discussions: discussions});
+  res.status(200).send({discussions: discussions});
 })
 
 /**
  * Find discussions i am in
  */
-router.get('/me', async (req, res) => {
+router.get('/me', auth, async (req, res) => {
   if (!req.user) {
-    return res.status(401).send({message: 'unauthorized'});
+    return res.status(401).send({message: 'Login required'});
   }
   const discussions = await DiscussionModel.find({members: req.user._id});
   if (!discussions) {
     return res.status(404).send({message: 'discussions not found'});
   }
-  res.send({discussions: discussions});
+  res.status(200).send({discussions: discussions});
 })
 
 /**
  * Find by id
  */
-router.get('/:id?',
+router.get('/:id?', auth,
   param('id')
     .notEmpty()
     .withMessage('id is required')
@@ -63,14 +69,14 @@ router.get('/:id?',
     if (!discussion) {
       return res.status(404).send({message: 'discussion not found'});
     }
-    res.send({discussion:discussion});
+    res.status(200).send({discussion:discussion});
 })
 
 
 /**
  * Add a member to a discussion
  */
-router.put('/:id/addMember',
+router.put('/:id/addMember', auth,
   param('id')
   .notEmpty()
   .withMessage('id is required')
@@ -94,7 +100,7 @@ router.put('/:id/addMember',
     discussion.members.push(req.body.idMember);
     discussion = await discussion.save();
 
-    res.status(201).send({discussion: discussion});
+    res.status(200).send({discussion: discussion});
   } catch (e) {
     res.status(400).send(e);
   }
@@ -103,7 +109,7 @@ router.put('/:id/addMember',
 /**
  * Remove myself from a discussion
  */
-router.put('/:idDiscussion/me',
+router.put('/:idDiscussion/me',auth,
   param('idDiscussion')
   .notEmpty()
   .withMessage('idDiscussion is required')
@@ -121,7 +127,7 @@ router.put('/:idDiscussion/me',
     }
     discussion = await discussion.save();
 
-    res.status(201).send({discussion: discussion});
+    res.status(200).send({discussion: discussion});
   } catch (e) {
     res.status(404).send(e);
   }
@@ -130,7 +136,7 @@ router.put('/:idDiscussion/me',
 /**
  * Remove a member of a discussion
  */
-router.put('/:idDiscussion/deleteMember',
+router.put('/:idDiscussion/deleteMember',auth,
   param('idDiscussion')
     .notEmpty()
     .withMessage('idDiscussion is required')
@@ -151,12 +157,10 @@ router.put('/:idDiscussion/deleteMember',
       }
       discussion = await discussion.save();
 
-      res.status(201).send({discussion: discussion});
+      res.status(200).send({discussion: discussion});
     } catch (e) {
       res.status(404).send(e);
     }
   })
-
-
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const express = require('express');
 const UserModel = require("../model/user.model");
 const {param, validationResult, body} = require("express-validator");
+const auth = require("../middlewareAuth");
 const router = express.Router();
 
 
@@ -15,10 +16,7 @@ router.get('/', async (req, res) => {
 /**
  * Find the current user
  */
-router.get('/me', async (req, res) => {
-  if (!req.user) {
-    return res.status(401).send({message: 'unauthorized'});
-  }
+router.get('/me', auth, async (req, res) => {
   const user = await UserModel.findOne({_id: req.user._id});
   if (!user) {
     return res.status(404).send({message: 'user not found'});
@@ -29,7 +27,7 @@ router.get('/me', async (req, res) => {
 /**
  * Find by id
  */
-router.get('/:id',
+router.get('/:id', auth,
   param('id')
     .notEmpty()
     .withMessage('id is required')

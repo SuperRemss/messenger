@@ -21,6 +21,8 @@ const msgTooLong = async (value) => {
   return value.length <= 300;
 }
 
+const verifConnexion =
+
 
 module.exports = {
   usernameValidators: [
@@ -34,7 +36,7 @@ module.exports = {
     {validator: textTooShort, msg: "Discussion name is too long"},
     {validator: textTooLong, msg: "Discussion name is too long"}],
   messageValidators: [
-    {validator: msgTooLong, msg: "Your message is too long"}
+    {validator: msgTooLong, msg: "Your message is too long"},
   ],
   userNotFound: [{validator: userExist, msg: "User not found"}]
 };

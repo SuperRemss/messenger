@@ -4,6 +4,8 @@ const UserModel = require("../model/user.model");
 const router = express.Router();
 const jsonwebtoken = require('jsonwebtoken');
 const {secret} = require('../config');
+const auth = require("../middlewareAuth");
+
 
 router.post('/login',
   body('username')
@@ -39,9 +41,9 @@ router.post('/login',
     })
   })
 
-router.delete('/logout', async (req, res) => {
+router.delete('/logout', auth, async (req, res) => {
   res.cookie('jwt', '', {maxAge: 0});
-  res.send({});
+  res.send({Success: "You've been disconnected"});
 })
 
 module.exports = router;
